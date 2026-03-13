@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Alessandro Silvestrin — CV</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ========== TOP BAR: language + theme switcher ========== -->
+  <div class="top-bar">
+    <button id="btn-en" class="lang-btn active" onclick="setLanguage('en')">EN</button>
+    <span class="lang-divider">|</span>
+    <button id="btn-it" class="lang-btn" onclick="setLanguage('it')">IT</button>
+    <div class="bar-divider"></div>
+    <div class="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode">
+      <span class="icon">🌙</span>
+      <div class="toggle-track"><div class="toggle-thumb"></div></div>
+      <span class="icon">☀️</span>
+    </div>
+  </div>
+
+  <!-- ========== HERO / HEADER (full-width) ========== -->
+  <header class="hero">
+    <div class="hero-content">
+      <img src="assets/profile.jpg" alt="Profile photo" class="avatar"
+           onerror="this.style.display='none'"/>
+      <h1>Alessandro Silvestrin</h1>
+      <p class="tagline" data-i18n="tagline"></p>
+      <div class="contact-links">
+        <span class="location">📍 Padova, Italia</span>
+        <a href="mailto:alessandro.silvestrin.as@gmail.com">📧 alessandro.silvestrin.as@gmail.com</a>
+        <a href="https://www.linkedin.com/in/alessandro-silvestrin-198a2031/" target="_blank">💼 LinkedIn</a>
+        <a href="https://github.com/alessandroatgmail/" target="_blank">
+          <svg height="16" width="16" viewBox="0 0 16 16" fill="currentColor" style="vertical-align:middle">
+            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38
+                     0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13
+                     -.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66
+                     .07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15
+                     -.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.64 7.64 0 0 1 2-.27
+                     c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12
+                     .51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48
+                     0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+          </svg> GitHub
+        </a>
+      </div>
+      <div class="counter-banner">
+        <span data-i18n="counterLabel"></span>
+        <span id="view-count">...</span>
+        <span data-i18n="counterTimes"></span>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- ========== ABOUT ME (full-width) ========== -->
+    <section class="card full-width" id="about">
+      <h2 data-i18n="aboutTitle"></h2>
+      <p data-i18n="aboutText"></p>
+    </section>
+
+    <!-- ========== TWO-COLUMN LAYOUT ========== -->
+    <div class="two-col">
+
+      <!-- ── LEFT COLUMN (2/3) ── -->
+      <div class="col-left">
+
+        <!-- Work Experience -->
+        <section class="card" id="experience">
+          <h2 data-i18n="experienceTitle"></h2>
+
+          <div class="timeline-item">
+
+            <div class="timeline-header">
+              <p><strong data-i18n="job1Title"></strong></p>
+              <span class="date">11-2021 — 2-2026</span>
+            </div>
+            <p class="company">Go reply/FAO · Remote</p>
+            <p class="job-desc"><span data-i18n="job1Desc"></span></p>
+            <p><b>Tech stack</b></p>
+            <ul data-i18n-list="job1Stack"></ul>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-header">
+              <strong data-i18n="job2Title"></strong>
+              <span class="date">6-2021 — 6-2022</span>
+            </div>
+            <p class="company">NTT Data/Sky Uk · Remote</p>
+            <p class="job-desc"><span data-i18n="job2Desc"></span></p>
+            <p><b>Tech stack</b></p>
+            <ul data-i18n-list="job2Stack"></ul>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-header">
+              <strong data-i18n="job3Title"></strong>
+              <span class="date">2020</span>
+            </div>
+            <p class="company">Freelance</p>
+            <p class="job-desc"><span data-i18n="job3Desc"></span></p>
+            <p><b>Tech stack</b></p>
+            <ul data-i18n-list="job3Stack"></ul>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-header">
+              <strong data-i18n="job4Title"></strong>
+              <span class="date">2019</span>
+            </div>
+            <p class="company">Freelance</p>
+            <p class="job-desc"><span data-i18n="job4Desc"></span></p>
+            <p><b>Tech stack</b></p>
+            <ul data-i18n-list="job4Stack"></ul>
+          </div>
+
+        </section>
+
+        <!-- My Day (donut chart placeholder) -->
+        <section class="card" id="my-day">
+          <h2 data-i18n="myDayTitle"></h2>
+          <p class="chart-caption" data-i18n="myDayCaption"></p>
+          <div class="chart-wrapper">
+            <!-- Replace src with your Python-generated PNG -->
+            <img
+              src="assets/charts/my-day.png"
+              alt="My typical day chart"
+              class="myday-chart-img"
+              onerror="this.parentElement.innerHTML='<div class=\'chart-placeholder\' data-i18n=\'chartPlaceholder\'></div>'"
+            />
+          </div>
+        </section>
+
+      </div><!-- /col-left -->
+
+      <!-- ── RIGHT COLUMN (1/3) ── -->
+      <div class="col-right">
+
+        <!-- Radar chart + Skills overview -->
+        <section class="card" id="skills">
+          <h2 data-i18n="skillsTitle"></h2>
+          <div class="chart-wrapper">
+            <!-- Replace src with your Python-generated PNG -->
+            <img
+              src="assets/charts/radar-skills.png"
+              alt="Skills radar chart"
+              class="chart-img"
+              onerror="this.parentElement.innerHTML='<div class=\'chart-placeholder\' data-i18n=\'chartPlaceholder\'></div>'"
+            />
+          </div>
+        </section>
+
+        <!-- Technical skills detail -->
+        <section class="card" id="tech-skills">
+          <h2 data-i18n="techSkillsTitle"></h2>
+          <div class="skills-grid-small">
+            <div class="skill-group">
+              <h3>Frontend</h3>
+              <ul>
+                <li>HTML / CSS / JavaScript</li>
+                <li>React</li>
+                <li data-i18n="skillResponsive"></li>
+              </ul>
+            </div>
+            <div class="skill-group">
+              <h3>Backend</h3>
+              <ul>
+                <li>Python</li>
+                <li>Django rest framework</li>
+                <li>REST APIs</li>
+                <li>SQL / NoSQL</li>
+              </ul>
+            </div>
+            <div class="skill-group">
+              <h3>Cloud</h3>
+              <ul>
+                <li>GCP</li>
+                <li>AWS</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- Education -->
+        <section class="card" id="education">
+          <h2 data-i18n="educationTitle"></h2>
+          <div class="timeline-item">
+            <div class="timeline-header">
+              <strong data-i18n="edu1Degree"></strong>
+            </div>
+            <p class="company" data-i18n="edu1School"></p>
+
+            <div class="timeline-header">
+              <strong data-i18n="edu2Degree"></strong>
+            </div>
+            <p class="company" data-i18n="edu2School"></p>
+          </div>
+
+        </section>
+
+        <!-- Other courses -->
+        <section class="card" id="courses">
+          <h2 data-i18n="coursesTitle"></h2>
+          <div class="timeline-item">
+            <div class="timeline-header">
+              <strong data-i18n="course1Title"></strong>
+              <span class="date" data-i18n="course1Year"></span>
+            </div>
+            <a data-i18n="courseCertificate" data-i18n-href="course1Link" href="#" target="_blank"></a>
+            <p class="company" data-i18n="course1Provider"></p>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-header">
+              <strong data-i18n="course2Title"></strong>
+              <span class="date" data-i18n="course2Year"></span>
+            </div>
+            <a data-i18n="courseCertificate" data-i18n-href="course2Link" href="#" target="_blank"></a>
+            <p class="company" data-i18n="course2Provider"></p>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-header">
+              <strong data-i18n="course3Title"></strong>
+              <span class="date" data-i18n="course3Year"></span>
+            </div>
+            <a data-i18n="courseCertificate" data-i18n-href="course3Link" href="#" target="_blank"></a>
+            <p class="company" data-i18n="course3Provider"></p>
+          </div>
+        </section>
+
+        <!-- Languages -->
+        <section class="card" id="languages">
+          <h2 data-i18n="languagesTitle"></h2>
+          <ul class="lang-list">
+            <li>
+              <span data-i18n="lang1Name"></span>
+              <span class="lang-level" data-i18n="lang1Level"></span>
+            </li>
+            <li>
+              <span data-i18n="lang2Name"></span>
+              <span class="lang-level" data-i18n="lang2Level"></span>
+            </li>
+          </ul>
+        </section>
+
+        <!-- Hobbies -->
+        <section class="card" id="hobbies">
+          <h2 data-i18n="hobbiesTitle"></h2>
+          <div class="hobbies-grid">
+            <span class="hobby-tag" data-i18n="hobby1"></span>
+            <span class="hobby-tag" data-i18n="hobby2"></span>
+            <span class="hobby-tag" data-i18n="hobby3"></span>
+            <span class="hobby-tag" data-i18n="hobby4"></span>
+          </div>
+        </section>
+
+      </div><!-- /col-right -->
+
+    </div><!-- /two-col -->
+
+    <!-- ========== CHATBOT (full-width) ========== -->
+    <section class="card full-width" id="chatbot">
+      <h2 data-i18n="chatTitle"></h2>
+      <p class="chatbot-intro" data-i18n="chatIntro"></p>
+      <div class="chat-window" id="chat-window"></div>
+      <div class="chat-input-row">
+        <input type="text" id="chat-input"
+               data-i18n-placeholder="chatPlaceholder" autocomplete="off"/>
+        <button id="chat-send-btn" onclick="sendMessage()" data-i18n="chatSend"></button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========== FOOTER ========== -->
+  <footer>
+    <p data-i18n="footerText"></p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
