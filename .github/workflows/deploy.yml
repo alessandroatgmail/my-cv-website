@@ -59,13 +59,13 @@ jobs:
             --zip-file fileb://function.zip
 
       # Step 4b: package and deploy rag-chatbot Lambda
-#      - name: Deploy rag-chatbot Lambda
-#        run: |
-#          cd lambda/rag-chatbot
-#          zip -r function.zip index.py
-#          aws lambda update-function-code \
-#            --function-name rag-chatbot \
-#            --zip-file fileb://function.zip
+      - name: Deploy rag-chatbot Lambda
+        run: |
+          cd lambda/rag-chatbot
+          zip -r function.zip index.py
+          aws lambda update-function-code \
+            --function-name rag-chatbot \
+            --zip-file fileb://function.zip
 
       # Step 4c: deploy view counter Lambda
       - name: Deploy counter Lambda
