@@ -1,24 +1,25 @@
 # ============================================
-# CI/CD Pipeline — Deploy to AWS S3
+# CI/CD Pipeline — Deploy to AWS
 # ============================================
 # Triggered on every push to the main branch.
 # Steps:
 #   1. Checkout the repository
 #   2. Configure AWS credentials
-#   3. Sync files to S3
-#   4. Invalidate CloudFront cache (when available)
+#   3. Sync static files to S3
+#   4. Deploy Lambda functions
+#   5. Invalidate CloudFront cache (when available)
 # ============================================
 
-name: Deploy to S3
+name: Deploy to AWS
 
 on:
   push:
     branches:
-      - main    # triggers only on push to main branch
+      - main
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest  # use the latest Ubuntu runner
+    runs-on: ubuntu-latest
 
     steps:
 
@@ -26,20 +27,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Step 2: configure AWS credentials using the secrets
-      # stored in GitHub repository settings
+      # Step 2: configure AWS credentials
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region:            ${{ secrets.AWS_REGION }}
+          aws-region:            eu-central-1
 
-
-      # Step 3: sync all files to S3
-      # --delete removes files from S3 that no longer exist locally
-      # --exclude excludes files that should not be uploaded
-      - name: Sync files to S3
+      # Step 3: sync static site files to S3
+      # knowledge-base/docs/ is excluded — uploaded manually to S3
+      # lambda/ is excluded — deployed separately in the next steps
+      - name: Sync static files to S3
         run: |
           aws s3 sync . s3://${{ secrets.AWS_S3_BUCKET }} \
             --delete \
@@ -49,9 +48,36 @@ jobs:
             --exclude "lambda/*" \
             --exclude "knowledge-base/docs/*"
 
-      # Step 4: invalidate CloudFront cache so users get the latest version
-      # This step is skipped until CloudFront is configured
-      # Uncomment and add CF_DISTRIBUTION_ID secret when ready
+      # Step 4a: package and deploy rag-indexer Lambda
+      # zip the function code and upload it to Lambda
+      - name: Deploy rag-indexer Lambda
+        run: |
+          cd lambda/rag-indexer
+          zip -r function.zip index.py
+          aws lambda update-function-code \
+            --function-name rag-indexer \
+            --zip-file fileb://function.zip
+
+      # Step 4b: package and deploy rag-chatbot Lambda
+#      - name: Deploy rag-chatbot Lambda
+#        run: |
+#          cd lambda/rag-chatbot
+#          zip -r function.zip index.py
+#          aws lambda update-function-code \
+#            --function-name rag-chatbot \
+#            --zip-file fileb://function.zip
+
+      # Step 4c: deploy view counter Lambda
+      - name: Deploy counter Lambda
+        run: |
+          cd lambda/counter
+          zip -r function.zip index.py
+          aws lambda update-function-code \
+            --function-name cv-view-counter \
+            --zip-file fileb://function.zip
+
+      # Step 5: invalidate CloudFront cache
+      # Uncomment when CloudFront is configured
       # - name: Invalidate CloudFront cache
       #   run: |
       #     aws cloudfront create-invalidation \
