@@ -1,0 +1,57 @@
+# ============================================
+# CI/CD Pipeline — Deploy to AWS S3
+# ============================================
+# Triggered on every push to the main branch.
+# Steps:
+#   1. Checkout the repository
+#   2. Configure AWS credentials
+#   3. Sync files to S3
+#   4. Invalidate CloudFront cache (when available)
+# ============================================
+
+name: Deploy to S3
+
+on:
+  push:
+    branches:
+      - main    # triggers only on push to main branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest  # use the latest Ubuntu runner
+
+    steps:
+
+      # Step 1: checkout the repository code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2: configure AWS credentials using the secrets
+      # stored in GitHub repository settings
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region:            eu-south-1
+
+      # Step 3: sync all files to S3
+      # --delete removes files from S3 that no longer exist locally
+      # --exclude excludes files that should not be uploaded
+      - name: Sync files to S3
+        run: |
+          aws s3 sync . s3://${{ secrets.AWS_S3_BUCKET }} \
+            --delete \
+            --exclude ".git/*" \
+            --exclude ".github/*" \
+            --exclude "*.md" \
+            --exclude "lambda/*"
+
+      # Step 4: invalidate CloudFront cache so users get the latest version
+      # This step is skipped until CloudFront is configured
+      # Uncomment and add CF_DISTRIBUTION_ID secret when ready
+      # - name: Invalidate CloudFront cache
+      #   run: |
+      #     aws cloudfront create-invalidation \
+      #       --distribution-id ${{ secrets.CF_DISTRIBUTION_ID }} \
+      #       --paths "/*"

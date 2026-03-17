@@ -2,7 +2,7 @@
    CONFIGURATION
    ============================================ */
 const CONFIG = {
-  counterApiUrl: "https://YOUR_API_GATEWAY_URL/counter",
+  counterApiUrl: "https://k74gwscm4l.execute-api.eu-central-1.amazonaws.com/counter",
   chatbotApiUrl: "https://YOUR_API_GATEWAY_URL/chat",
 };
 
