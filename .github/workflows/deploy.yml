@@ -33,7 +33,7 @@ jobs:
         with:
           aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region:            eu-south-1
+          aws-region:            eu-central-1
 
       # Step 3: sync all files to S3
       # --delete removes files from S3 that no longer exist locally
