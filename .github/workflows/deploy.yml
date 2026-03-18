@@ -53,7 +53,7 @@ jobs:
       - name: Deploy rag-indexer Lambda
         run: |
           cd lambda/rag-indexer
-          zip -r function.zip index.py
+          zip -r function.zip lambda_function.py
           aws lambda update-function-code \
             --function-name rag-indexer \
             --zip-file fileb://function.zip
@@ -62,7 +62,7 @@ jobs:
       - name: Deploy rag-chatbot Lambda
         run: |
           cd lambda/rag-chatbot
-          zip -r function.zip index.py
+          zip -r function.zip lambda_function.py
           aws lambda update-function-code \
             --function-name rag-chatbot \
             --zip-file fileb://function.zip
@@ -71,7 +71,7 @@ jobs:
       - name: Deploy counter Lambda
         run: |
           cd lambda/counter
-          zip -r function.zip index.py
+          zip -r function.zip lambda_function.py
           aws lambda update-function-code \
             --function-name cv-view-counter \
             --zip-file fileb://function.zip
