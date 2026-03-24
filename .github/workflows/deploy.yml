@@ -98,7 +98,8 @@ jobs:
               INDEX_KEY=knowledge-base/index.json,\
               TOP_K=3,OWNER_NAME=Alessandro,\
               GCP_REGION=europe-west8,\
-              MODEL_ID=gemini-2.5-flash
+              MODEL_ID=gemini-2.5-flash, \
+              GCP_PROJECT=alessandro-silvestrin-cv
           
 
       # Step 7: invoke the RAG indexer after all services are deployed
