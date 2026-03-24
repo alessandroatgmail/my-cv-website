@@ -60,34 +60,43 @@ jobs:
             --path "/*" \
             --project=${{ secrets.GCP_PROJECT_ID }}
 
-      # Step 6a: deploy the visit counter Cloud Run service.
-      # Since the service was created manually from the console, we use
-      # gcloud run deploy to update it instead of gcloud functions deploy
-      # which would try to create a new service and fail with 409 conflict.
+      # Step 6a: deploy the visit counter Cloud Function.
       - name: Deploy counter Cloud Function
         run: |
-          gcloud run deploy visit-counter \
-            --source=lambda/counter \
+          gcloud functions deploy visit-counter \
+            --gen2 \
+            --runtime=python312 \
             --region=europe-west8 \
+            --source=lambda/counter \
+            --entry-point=visit_counter \
+            --trigger-http \
             --allow-unauthenticated \
             --project=${{ secrets.GCP_PROJECT_ID }}
 
-      # Step 6b: deploy the RAG indexer Cloud Run service.
+      # Step 6b: deploy the RAG indexer Cloud Function.
       # No --allow-unauthenticated — internal only.
       - name: Deploy rag-indexer Cloud Function
         run: |
-          gcloud run deploy rag-indexer \
-            --source=lambda/rag-indexer \
+          gcloud functions deploy rag-indexer \
+            --gen2 \
+            --runtime=python312 \
             --region=europe-west8 \
+            --source=lambda/rag-indexer \
+            --entry-point=rag_indexer \
+            --trigger-http \
             --no-allow-unauthenticated \
             --project=${{ secrets.GCP_PROJECT_ID }}
 
-      # Step 6c: deploy the RAG chatbot Cloud Run service.
+      # Step 6c: deploy the RAG chatbot Cloud Function.
       - name: Deploy rag-chatbot Cloud Function
         run: |
-          gcloud run deploy rag-chatbot \
-            --source=lambda/rag-chatbot \
+          gcloud functions deploy rag-chatbot \
+            --gen2 \
+            --runtime=python312 \
             --region=europe-west8 \
+            --source=lambda/rag-chatbot \
+            --entry-point=rag_chatbot \
+            --trigger-http \
             --allow-unauthenticated \
             --project=${{ secrets.GCP_PROJECT_ID }}
 
