@@ -79,6 +79,14 @@ jobs:
           gcloud auth list
           gcloud config list project
           gcloud projects describe ${{ secrets.GCP_PROJECT_ID }}
+      - name: Debug rag-indexer source
+        run: |
+          echo "=== Directory contents ==="
+          ls -la lambda/rag-indexer/
+          echo "=== Procfile ==="
+          cat lambda/rag-indexer/Procfile
+          echo "=== requirements.txt ==="
+          cat lambda/rag-indexer/requirements.txt
 
       # Step 6b: deploy the RAG indexer Cloud Run service.
       # --no-allow-unauthenticated — internal use only, called with identity token.
