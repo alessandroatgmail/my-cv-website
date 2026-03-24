@@ -7,7 +7,8 @@
 #   2. Authenticate to GCP via Service Account
 #   3. Sync static files to Cloud Storage
 #   4. Invalidate Cloud CDN cache
-#   5. Deploy Cloud Functions (counter, rag-indexer, rag-chatbot)
+#   5. Deploy Cloud Run services (counter, rag-indexer, rag-chatbot)
+#   6. Run RAG indexer to rebuild the BM25 index
 # ============================================
 
 name: Deploy to GCP
@@ -43,7 +44,7 @@ jobs:
 
       # Step 4: sync static site files to Cloud Storage.
       # --delete removes files from the bucket that no longer exist locally.
-      # lambda/ is excluded — deployed separately as Cloud Functions.
+      # lambda/ is excluded — deployed separately as Cloud Run services.
       # knowledge-base/docs/ is excluded — uploaded manually.
       - name: Sync static files to Cloud Storage
         run: |
@@ -53,56 +54,46 @@ jobs:
 
       # Step 5: invalidate Cloud CDN cache so visitors immediately see
       # the updated files instead of the cached version.
-      # This uses the URL map associated with the load balancer.
       - name: Invalidate Cloud CDN cache
         run: |
           gcloud compute url-maps invalidate-cdn-cache cv-load-balancer \
             --path "/*" \
             --project=${{ secrets.GCP_PROJECT_ID }}
 
-      # Step 6a: deploy the visit counter Cloud Function.
-      - name: Deploy counter Cloud Function
+      # Step 6a: deploy the visit counter Cloud Run service.
+      # gcloud run deploy --source handles both first deploy and updates
+      # without the 409 conflict that gcloud functions deploy causes.
+      # The Procfile in lambda/counter tells Buildpacks to use
+      # functions-framework targeting the visit_counter function.
+      - name: Deploy counter Cloud Run service
         run: |
-          gcloud functions deploy visit-counter \
-            --gen2 \
-            --runtime=python312 \
-            --region=europe-west8 \
+          gcloud run deploy visit-counter \
             --source=lambda/counter \
-            --entry-point=visit_counter \
-            --trigger-http \
+            --region=europe-west8 \
             --allow-unauthenticated \
             --project=${{ secrets.GCP_PROJECT_ID }}
 
-      # Step 6b: deploy the RAG indexer Cloud Function.
-      # No --allow-unauthenticated — internal only.
-      - name: Deploy rag-indexer Cloud Function
+      # Step 6b: deploy the RAG indexer Cloud Run service.
+      # --no-allow-unauthenticated — internal use only, called with identity token.
+      - name: Deploy rag-indexer Cloud Run service
         run: |
-          gcloud functions deploy rag-indexer \
-            --gen2 \
-            --runtime=python312 \
-            --region=europe-west8 \
+          gcloud run deploy rag-indexer \
             --source=lambda/rag-indexer \
-            --entry-point=rag_indexer \
-            --trigger-http \
+            --region=europe-west8 \
             --no-allow-unauthenticated \
             --project=${{ secrets.GCP_PROJECT_ID }}
 
-      # Step 6c: deploy the RAG chatbot Cloud Function.
-      - name: Deploy rag-chatbot Cloud Function
+      # Step 6c: deploy the RAG chatbot Cloud Run service.
+      - name: Deploy rag-chatbot Cloud Run service
         run: |
-          gcloud functions deploy rag-chatbot \
-            --gen2 \
-            --runtime=python312 \
-            --region=europe-west8 \
+          gcloud run deploy rag-chatbot \
             --source=lambda/rag-chatbot \
-            --entry-point=rag_chatbot \
-            --trigger-http \
+            --region=europe-west8 \
             --allow-unauthenticated \
             --project=${{ secrets.GCP_PROJECT_ID }}
 
-      # Step 7: invoke the RAG indexer after all functions are deployed
+      # Step 7: invoke the RAG indexer after all services are deployed
       # so the BM25 index is always rebuilt when documents change.
-      # Uses Cloud Run (gen2 functions live on Cloud Run, not Cloud Functions).
       - name: Run RAG indexer
         run: |
           TOKEN=$(gcloud auth print-identity-token)
