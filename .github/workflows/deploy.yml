@@ -60,47 +60,34 @@ jobs:
             --path "/*" \
             --project=${{ secrets.GCP_PROJECT_ID }}
 
-      # Step 6a: deploy the visit counter Cloud Function.
-      # --source points to the folder containing main.py + requirements.txt.
-      # --entry-point must match the function name defined in main.py.
-      # --trigger-http exposes the function as an HTTP endpoint.
-      # --allow-unauthenticated allows the browser to call it directly.
+      # Step 6a: deploy the visit counter Cloud Run service.
+      # Since the service was created manually from the console, we use
+      # gcloud run deploy to update it instead of gcloud functions deploy
+      # which would try to create a new service and fail with 409 conflict.
       - name: Deploy counter Cloud Function
         run: |
-          gcloud functions deploy visit-counter \
-            --gen2 \
-            --runtime=python312 \
-            --region=europe-west8 \
+          gcloud run deploy visit-counter \
             --source=lambda/counter \
-            --entry-point=visit_counter \
-            --trigger-http \
+            --region=europe-west8 \
             --allow-unauthenticated \
             --project=${{ secrets.GCP_PROJECT_ID }}
 
-      # Step 6b: deploy the RAG indexer Cloud Function.
-      # No --allow-unauthenticated — this function is internal only,
-      # called exclusively by this pipeline, never by the browser.
+      # Step 6b: deploy the RAG indexer Cloud Run service.
+      # No --allow-unauthenticated — internal only.
       - name: Deploy rag-indexer Cloud Function
         run: |
-          gcloud functions deploy rag-indexer \
-            --gen2 \
-            --runtime=python312 \
-            --region=europe-west8 \
+          gcloud run deploy rag-indexer \
             --source=lambda/rag-indexer \
-            --entry-point=rag_indexer \
-            --trigger-http \
+            --region=europe-west8 \
+            --no-allow-unauthenticated \
             --project=${{ secrets.GCP_PROJECT_ID }}
 
-      # Step 6c: deploy the RAG chatbot Cloud Function.
+      # Step 6c: deploy the RAG chatbot Cloud Run service.
       - name: Deploy rag-chatbot Cloud Function
         run: |
-          gcloud functions deploy rag-chatbot \
-            --gen2 \
-            --runtime=python312 \
-            --region=europe-west8 \
+          gcloud run deploy rag-chatbot \
             --source=lambda/rag-chatbot \
-            --entry-point=rag_chatbot \
-            --trigger-http \
+            --region=europe-west8 \
             --allow-unauthenticated \
             --project=${{ secrets.GCP_PROJECT_ID }}
 
