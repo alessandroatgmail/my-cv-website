@@ -81,7 +81,9 @@ jobs:
             --source=lambda/rag-indexer \
             --region=europe-west8 \
             --no-allow-unauthenticated \
-            --project=${{ secrets.GCP_PROJECT_ID }}
+            --project=${{ secrets.GCP_PROJECT_ID }} \
+            --set-env-vars="BUCKET_NAME=${{ secrets.GCP_BUCKET }}" 
+          
 
       # Step 6c: deploy the RAG chatbot Cloud Run service.
       - name: Deploy rag-chatbot Cloud Run service
@@ -90,7 +92,14 @@ jobs:
             --source=lambda/rag-chatbot \
             --region=europe-west8 \
             --allow-unauthenticated \
-            --project=${{ secrets.GCP_PROJECT_ID }}
+            --project=${{ secrets.GCP_PROJECT_ID }} \
+            --set-env-vars="\
+              BUCKET_NAME=${{ secrets.GCP_BUCKET }},\
+              INDEX_KEY=knowledge-base/index.json,\
+              TOP_K=3,OWNER_NAME=Alessandro,\
+              GCP_REGION=europe-west8,\
+              MODEL_ID=gemini-2.5-flash
+          
 
       # Step 7: invoke the RAG indexer after all services are deployed
       # so the BM25 index is always rebuilt when documents change.
