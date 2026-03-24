@@ -1,16 +1,16 @@
 # ============================================
-# CI/CD Pipeline — Deploy to AWS
+# CI/CD Pipeline — Deploy to GCP
 # ============================================
 # Triggered on every push to the main branch.
 # Steps:
 #   1. Checkout the repository
-#   2. Configure AWS credentials
-#   3. Sync static files to S3
-#   4. Deploy Lambda functions
-#   5. Invalidate CloudFront cache (when available)
+#   2. Authenticate to GCP via Service Account
+#   3. Sync static files to Cloud Storage
+#   4. Invalidate Cloud CDN cache
+#   5. Deploy Cloud Functions (counter, rag-indexer, rag-chatbot)
 # ============================================
 
-name: Deploy to AWS
+name: Deploy to GCP
 
 on:
   push:
@@ -27,59 +27,98 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Step 2: configure AWS credentials
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+      # Step 2: authenticate to GCP using the service account JSON key
+      # stored as a GitHub secret. This action configures gcloud CLI
+      # and sets up application default credentials for all subsequent steps.
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
         with:
-          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region:            eu-central-1
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
 
-      # Step 3: sync static site files to S3
-      # knowledge-base/docs/ is excluded — uploaded manually to S3
-      # lambda/ is excluded — deployed separately in the next steps
-      - name: Sync static files to S3
+      # Step 3: install and configure the gcloud CLI
+      - name: Set up gcloud CLI
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+      # Step 4: sync static site files to Cloud Storage.
+      # --delete removes files from the bucket that no longer exist locally.
+      # lambda/ is excluded — deployed separately as Cloud Functions.
+      # knowledge-base/docs/ is excluded — uploaded manually.
+      - name: Sync static files to Cloud Storage
         run: |
-          aws s3 sync . s3://${{ secrets.AWS_S3_BUCKET }} \
-            --delete \
-            --exclude ".git/*" \
-            --exclude ".github/*" \
-            --exclude "*.md" \
-            --exclude "lambda/*" \
-            --exclude "knowledge-base/docs/*"
+          gcloud storage rsync . gs://${{ secrets.GCP_BUCKET }} \
+            --recursive \
+            --delete-unmatched-destination-objects \
+            --exclude="\.git/.*" \
+            --exclude="\.github/.*" \
+            --exclude=".*\.md" \
+            --exclude="lambda/.*" \
+            --exclude="knowledge-base/docs/.*"
 
-      # Step 4a: package and deploy rag-indexer Lambda
-      # zip the function code and upload it to Lambda
-      - name: Deploy rag-indexer Lambda
+      # Step 5: invalidate Cloud CDN cache so visitors immediately see
+      # the updated files instead of the cached version.
+      # This uses the URL map associated with the load balancer.
+      - name: Invalidate Cloud CDN cache
         run: |
-          cd lambda/rag-indexer
-          zip -r function.zip lambda_function.py
-          aws lambda update-function-code \
-            --function-name rag-indexer \
-            --zip-file fileb://function.zip
+          gcloud compute url-maps invalidate-cdn-cache cv-load-balancer \
+            --path "/*" \
+            --project=${{ secrets.GCP_PROJECT_ID }}
 
-      # Step 4b: package and deploy rag-chatbot Lambda
-      - name: Deploy rag-chatbot Lambda
+      # Step 6a: deploy the visit counter Cloud Function.
+      # --source points to the folder containing main.py + requirements.txt.
+      # --entry-point must match the function name defined in main.py.
+      # --trigger-http exposes the function as an HTTP endpoint.
+      # --allow-unauthenticated allows the browser to call it directly.
+      - name: Deploy counter Cloud Function
         run: |
-          cd lambda/rag-chatbot
-          zip -r function.zip lambda_function.py
-          aws lambda update-function-code \
-            --function-name rag-chatbot \
-            --zip-file fileb://function.zip
+          gcloud functions deploy visit-counter \
+            --gen2 \
+            --runtime=python312 \
+            --region=europe-west8 \
+            --source=lambda/counter \
+            --entry-point=visit_counter \
+            --trigger-http \
+            --allow-unauthenticated \
+            --project=${{ secrets.GCP_PROJECT_ID }}
 
-      # Step 4c: deploy view counter Lambda
-      - name: Deploy counter Lambda
+      # Step 6b: deploy the RAG indexer Cloud Function.
+      # No --allow-unauthenticated — this function is internal only,
+      # called exclusively by this pipeline, never by the browser.
+      - name: Deploy rag-indexer Cloud Function
         run: |
-          cd lambda/counter
-          zip -r function.zip lambda_function.py
-          aws lambda update-function-code \
-            --function-name cv-view-counter \
-            --zip-file fileb://function.zip
+          gcloud functions deploy rag-indexer \
+            --gen2 \
+            --runtime=python312 \
+            --region=europe-west8 \
+            --source=lambda/rag-indexer \
+            --entry-point=rag_indexer \
+            --trigger-http \
+            --project=${{ secrets.GCP_PROJECT_ID }}
 
-      # Step 5: invalidate CloudFront cache
-      # Uncomment when CloudFront is configured
-      # - name: Invalidate CloudFront cache
-      #   run: |
-      #     aws cloudfront create-invalidation \
-      #       --distribution-id ${{ secrets.CF_DISTRIBUTION_ID }} \
-      #       --paths "/*"
+      # Step 6c: deploy the RAG chatbot Cloud Function.
+      - name: Deploy rag-chatbot Cloud Function
+        run: |
+          gcloud functions deploy rag-chatbot \
+            --gen2 \
+            --runtime=python312 \
+            --region=europe-west8 \
+            --source=lambda/rag-chatbot \
+            --entry-point=rag_chatbot \
+            --trigger-http \
+            --allow-unauthenticated \
+            --project=${{ secrets.GCP_PROJECT_ID }}
+
+      # Step 7: invoke the RAG indexer after all functions are deployed
+      # so the BM25 index is always rebuilt when documents change.
+      # Uses Cloud Run (gen2 functions live on Cloud Run, not Cloud Functions).
+      - name: Run RAG indexer
+        run: |
+          TOKEN=$(gcloud auth print-identity-token)
+          URL=$(gcloud run services describe rag-indexer \
+            --region=europe-west8 \
+            --project=${{ secrets.GCP_PROJECT_ID }} \
+            --format="value(status.url)")
+          curl -s -X POST "$URL" \
+            -H "Authorization: Bearer $TOKEN" \
+            -H "Content-Type: application/json"

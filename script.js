@@ -2,8 +2,8 @@
    CONFIGURATION
    ============================================ */
 const CONFIG = {
-  counterApiUrl: "https://k74gwscm4l.execute-api.eu-central-1.amazonaws.com/counter",
-  chatbotApiUrl: "https://YOUR_API_GATEWAY_URL/chat",
+  counterApiUrl: "https://visit-counter-795762551612.europe-west8.run.app",
+  chatbotApiUrl: "https://rag-chatbot-795762551612.europe-west8.run.app",
 };
 
 /* ============================================
@@ -80,11 +80,11 @@ I subsequently developed an API with Django REST to make the models available to
     chartPlaceholder: "📊 Chart coming soon",
 
     chatTitle:        "Ask Me Anything 🤖",
-    chatIntro:        "Have a question about my experience or skills? Ask my AI assistant!",
-    chatWelcome:      "Hi! I'm an AI assistant trained on this CV. Ask me anything about skills, experience, or availability! 👋",
+    chatIntro:        "Have a question about my experience or skills? Ask Silv.io my virtual assistant!",
+    chatWelcome:      "Hi! I'm Silv.io, Alessandro virtual assistant trained on this CV. Ask me anything about skills, experience, or availability! 👋",
     chatPlaceholder:  "e.g. What are your main skills?",
     chatSend:         "Send",
-    footerText:       "Built with ☁️ AWS · Hosted on S3 + CloudFront",
+    footerText:       "Built with ☁️ GCP · Hosted on Cloud Storage + Cloud CDN",
   },
   it: {
         tagline: `
@@ -127,11 +127,11 @@ Successivamente sviluppato una Api con django rest per far usufruire i modelli a
     edu2School:       "Nome istituto · ITIS F. Severi Padova",
     myDayTitle:       "La mia giornata",
     chatTitle:        "Chiedimi Qualcosa 🤖",
-    chatIntro:        "Hai domande sulla mia esperienza o competenze? Chiedi al mio assistente AI!",
-    chatWelcome:      "Ciao! Sono un assistente AI addestrato su questo CV. Chiedimi pure di competenze, esperienza o disponibilità! 👋",
+    chatIntro:        "Hai domande sulla mia esperienza o competenze? Chiedi a Silvio il mio alter ego virtuale!",
+    chatWelcome:      "Ciao! Sono Sono Silv.io, l'assistente virtuale di Alessandro, addestrato su questo CV. Chiedimi pure di competenze, esperienza o disponibilità! 👋",
     chatPlaceholder:  "es. Quali sono le tue competenze principali?",
     chatSend:         "Invia",
-    footerText:       "Realizzato con ☁️ AWS · Ospitato su S3 + CloudFront",
+    footerText:       "Realizzato con ☁️ GCP · Ospitato su Cloud Storage + Cloud CDN",
     languagesTitle:   "Lingue",
 
     coursesTitle:     "Altri Corsi",
