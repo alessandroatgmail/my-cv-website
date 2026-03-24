@@ -48,13 +48,13 @@ jobs:
       - name: Sync static files to Cloud Storage
         run: |
           gcloud storage rsync . gs://${{ secrets.GCP_BUCKET }} \
-            --recursive \
             --delete-unmatched-destination-objects \
             --exclude="\.git/.*" \
             --exclude="\.github/.*" \
             --exclude=".*\.md" \
             --exclude="lambda/.*" \
-            --exclude="knowledge-base/docs/.*"
+            --exclude="knowledge-base/docs/.*" \
+            --exclude="gha-creds.*\.json"
 
       # Step 5: invalidate Cloud CDN cache so visitors immediately see
       # the updated files instead of the cached version.
