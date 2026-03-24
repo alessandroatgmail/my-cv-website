@@ -47,14 +47,9 @@ jobs:
       # knowledge-base/docs/ is excluded — uploaded manually.
       - name: Sync static files to Cloud Storage
         run: |
-          gcloud storage rsync . gs://${{ secrets.GCP_BUCKET }} \
-            --delete-unmatched-destination-objects \
-            --exclude="\.git/.*" \
-            --exclude="\.github/.*" \
-            --exclude=".*\.md" \
-            --exclude="lambda/.*" \
-            --exclude="knowledge-base/docs/.*" \
-            --exclude="gha-creds.*\.json"
+          gsutil -m rsync -r -d \
+            -x "\.git/.*|\.github/.*|.*\.md|lambda/.*|knowledge-base/docs/.*|gha-creds.*\.json" \
+            . gs://${{ secrets.GCP_BUCKET }}
 
       # Step 5: invalidate Cloud CDN cache so visitors immediately see
       # the updated files instead of the cached version.
