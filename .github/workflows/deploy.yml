@@ -65,7 +65,7 @@ jobs:
         run: |
           gcloud functions deploy visit-counter \
             --gen2 \
-            --runtime=python314 \
+            --runtime=python312 \
             --region=europe-west8 \
             --source=lambda/counter \
             --entry-point=visit_counter \
@@ -79,7 +79,7 @@ jobs:
         run: |
           gcloud functions deploy rag-indexer \
             --gen2 \
-            --runtime=python314 \
+            --runtime=python312 \
             --region=europe-west8 \
             --source=lambda/rag-indexer \
             --entry-point=rag_indexer \
@@ -92,7 +92,7 @@ jobs:
         run: |
           gcloud functions deploy rag-chatbot \
             --gen2 \
-            --runtime=python314 \
+            --runtime=python312 \
             --region=europe-west8 \
             --source=lambda/rag-chatbot \
             --entry-point=rag_chatbot \
