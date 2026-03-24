@@ -73,6 +73,13 @@ jobs:
             --allow-unauthenticated \
             --project=${{ secrets.GCP_PROJECT_ID }}
 
+      # debug before indexer
+      - name: Debug GCP auth
+        run: |
+          gcloud auth list
+          gcloud config list project
+          gcloud projects describe ${{ secrets.GCP_PROJECT_ID }}
+
       # Step 6b: deploy the RAG indexer Cloud Run service.
       # --no-allow-unauthenticated — internal use only, called with identity token.
       - name: Deploy rag-indexer Cloud Run service
@@ -101,12 +108,6 @@ jobs:
               MODEL_ID=gemini-2.5-flash, \
               GCP_PROJECT=${{ secrets.GCP_PROJECT_ID }}"
 
-      # debug before indexer
-      - name: Debug GCP auth
-        run: |
-          gcloud auth list
-          gcloud config list project
-          gcloud projects describe ${{ secrets.GCP_PROJECT_ID }}
 
       # Step 7: invoke the RAG indexer after all services are deployed
       # so the BM25 index is always rebuilt when documents change.
