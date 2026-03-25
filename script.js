@@ -81,7 +81,7 @@ I subsequently developed an API with Django REST to make the models available to
 
     chatTitle:        "Ask Me Anything 🤖",
     chatIntro:        "Have a question about my experience or skills? Ask Silv.io my virtual assistant!",
-    chatWelcome:      "Hi! I'm Silv.io, Alessandro virtual assistant trained on this CV. Ask me anything about skills, experience, or availability! 👋",
+    chatWelcome:      "Hi! I'm Silv.io, Alessandro virtual assistant trained on this CV. Ask me anything about skills, experience, or availability! 👋 (bear in mind due to limited time and resources, I can only provide a limited set of information. Questions should be under ~380 words and answers are limited to ~150 words.)",
     chatPlaceholder:  "e.g. What are your main skills?",
     chatSend:         "Send",
     footerText:       "Built with ☁️ GCP · Hosted on Cloud Storage + Cloud CDN",
@@ -128,7 +128,7 @@ Successivamente sviluppato una Api con django rest per far usufruire i modelli a
     myDayTitle:       "La mia giornata",
     chatTitle:        "Chiedimi Qualcosa 🤖",
     chatIntro:        "Hai domande sulla mia esperienza o competenze? Chiedi a Silvio il mio alter ego virtuale!",
-    chatWelcome:      "Ciao! Sono Sono Silv.io, l'assistente virtuale di Alessandro, addestrato su questo CV. Chiedimi pure di competenze, esperienza o disponibilità! 👋",
+    chatWelcome:      "Ciao! Sono Silv.io, l'assistente virtuale di Alessandro, addestrato su questo CV. Chiedimi pure di competenze, esperienza o disponibilità! 👋 (Tieni presente che per limitazioni di tempo e risorse, posso fornire solo un insieme limitato di informazioni. Le domande dovrebbero essere sotto le ~380 parole e le risposte sono limitate a circa 150 parole.)",
     chatPlaceholder:  "es. Quali sono le tue competenze principali?",
     chatSend:         "Invia",
     footerText:       "Realizzato con ☁️ GCP · Ospitato su Cloud Storage + Cloud CDN",

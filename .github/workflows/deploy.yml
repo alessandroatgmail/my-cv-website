@@ -97,7 +97,7 @@ jobs:
             --region=europe-west8 \
             --no-allow-unauthenticated \
             --project=${{ secrets.GCP_PROJECT_ID }} \
-            --set-env-vars="BUCKET_NAME=${{ secrets.GCP_BUCKET }},GCP_PROJECT=alessandro-silvestrin-cv" 
+            --set-env-vars="BUCKET_NAME=${{ secrets.GCP_BUCKET }},GCP_PROJECT=${{ secrets.GCP_PROJECT_ID }}" 
           
 
       # Step 6c: deploy the RAG chatbot Cloud Run service.
@@ -109,11 +109,11 @@ jobs:
             --allow-unauthenticated \
             --project=${{ secrets.GCP_PROJECT_ID }} \
             --set-env-vars="\
-              BUCKET_NAME=alessandro-silvestrin-cv-site,\
-              INDEX_KEY=knowledge-base/index.json,\
+              BUCKET_NAME=${{ secrets.GCP_BUCKET }},\
+              INDEX_KEY=${{ secrets.INDEX_KEY }},\
               TOP_K=3,OWNER_NAME=Alessandro,\
-              GCP_REGION=europe-west8,\
-              MODEL_ID=gemini-2.5-flash, \
+              GCP_REGION=${{ secrets.GCP_REGION }},\
+              MODEL_ID=${{ secrets.GCP_MODEL_ID }}, \
               GCP_PROJECT=${{ secrets.GCP_PROJECT_ID }}"
 
 
