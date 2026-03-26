@@ -14,7 +14,7 @@ const CONFIG = {
    ============================================ */
 const TRANSLATIONS = {
 en: {
-    tagline:       `Backend developer — and more. After 3 years of continuous work for Go Reply on the FAO client, I am now looking for new opportunities. This page is my online CV deployed on AWS, both as a presentation and a learning project. Anything you can't find about me here, you can ask Silvio — my virtual alter ego. The project is available on my GitHub page.`,
+    tagline:       `Backend developer — and more. After 3 years of continuous work for Go Reply on the FAO client, I am now looking for new opportunities. This page is my online CV deployed on GCP, both as a presentation and a learning project. Anything you can't find about me here, you can ask Silvio — my virtual alter ego. The project is available on my GitHub page.`,
     counterLabel:  "👁️ This page has been visited",
     counterTimes:  "times",
     aboutTitle:    "About Me",
@@ -89,7 +89,7 @@ I subsequently developed an API with Django REST to make the models available to
   it: {
         tagline: `
     Backend developer ma non solo. Dopo 3 anni di lavoro continuativo per Go reply su cliente FAO sono alla ricerca di nuove opportunità.
-    Questa pagina è il mio CV online deployato so AWS come presentazione e progetto didattico. Quello che non trovate su di me in questa pagina lo potete chiedere a Silvio il mio alter ego virtuale
+    Questa pagina è il mio CV online deployato su GCP come presentazione e progetto didattico. Quello che non trovate su di me in questa pagina lo potete chiedere a Silvio il mio alter ego virtuale
     il progetto è disponbile sulla mia pagina github
     `,
     counterLabel:  "👁️ Questa pagina è stata visitata",
@@ -213,9 +213,20 @@ function setLanguage(lang) {
   const t = TRANSLATIONS[lang];
 
   // ── Replace all [data-i18n] element inner texts ──
+  // Use innerHTML only for values that intentionally contain HTML (e.g. <br> in job descriptions).
+  // Everything else uses textContent to avoid XSS if the source ever changes.
+  const HTML_KEYS = new Set([
+    "job1Desc", "job2Desc", "job3Desc", "job4Desc",
+    "tagline",
+  ]);
   document.querySelectorAll("[data-i18n]").forEach(el => {
     const key = el.getAttribute("data-i18n");
-    if (t[key] !== undefined) el.innerHTML = t[key];
+    if (t[key] === undefined) return;
+    if (HTML_KEYS.has(key)) {
+      el.innerHTML = t[key];
+    } else {
+      el.textContent = t[key];
+    }
   });
 
   // ── Replace input placeholders ─────────────────

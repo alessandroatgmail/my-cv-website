@@ -1,3 +1,4 @@
+import time
 import functions_framework
 from google.cloud import firestore
 
@@ -5,6 +6,20 @@ from google.cloud import firestore
 # This way it is reused across multiple invocations (warm starts),
 # avoiding the overhead of creating a new connection every time.
 db = firestore.Client()
+
+# ── Per-IP rate limiting ───────────────────────────────────────────────────────
+# Allows max 1 counter increment per IP per hour (per container instance).
+_rate_limit_window = 3600  # 1 hour in seconds
+_rate_store: dict[str, float] = {}
+
+
+def is_rate_limited(ip: str) -> bool:
+    now = time.time()
+    last_seen = _rate_store.get(ip, 0)
+    if now - last_seen < _rate_limit_window:
+        return True
+    _rate_store[ip] = now
+    return False
 
 
 @functions_framework.http
@@ -32,9 +47,14 @@ def visit_counter(request):
     if request.method == "OPTIONS":
         return ("", 204, headers)
 
-    # Reference to the specific document in Firestore.
-    # This does not perform any network call yet.
+    # ── Rate limiting: one increment per IP per hour ───────────────────────────
+    client_ip = request.headers.get("X-Forwarded-For", request.remote_addr or "unknown").split(",")[0].strip()
     doc_ref = db.collection("stats").document("visit_counter")
+    if is_rate_limited(client_ip):
+        # Return current count without incrementing
+        doc = doc_ref.get()
+        count = doc.to_dict().get("count", 0) if doc.exists else 0
+        return ({"count": count}, 200, headers)
 
     # INCREMENT operation — Firestore's atomic increment ensures
     # that concurrent requests don't overwrite each other's counts.

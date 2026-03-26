@@ -14,19 +14,14 @@ Environment variables:
   GCP_PROJECT  — your GCP project ID
   GCP_REGION   — Vertex AI region (default: "europe-west8")
 
-Migration notes (AWS → GCP):
-  - boto3 s3 client            → google-cloud-storage Client
-  - boto3 bedrock-runtime      → google-cloud-aiplatform GenerativeModel
-  - Llama 3.1 on Bedrock       → Gemini 2.0 Flash on Vertex AI
-  - bedrock.invoke_model()     → model.generate_content()
-  - lambda_handler()           → HTTP Cloud Function with functions_framework
-  - event["body"]              → request.get_json()
+
 """
 
 import json
 import os
 import re
 import math
+import time
 import functions_framework
 from google.cloud import storage
 import vertexai
@@ -55,6 +50,30 @@ BM25_B  = 0.75  # length normalization
 
 # In-memory cache for the index — persists across warm invocations
 _index_cache = None
+
+# ── Per-IP rate limiting ───────────────────────────────────────────────────────
+# Stored per container instance (best-effort for a personal site).
+# Limit: 10 requests per IP per 60 seconds.
+_rate_limit_window = 60       # seconds
+_rate_limit_max    = 10       # requests per window
+_rate_store: dict[str, list[float]] = {}
+
+# ── Input limits ──────────────────────────────────────────────────────────────
+MAX_MESSAGES    = 20    # max entries in the history array
+MAX_MSG_LENGTH  = 1000  # max chars per message
+VALID_ROLES     = {"user", "assistant"}
+
+
+def is_rate_limited(ip: str) -> bool:
+    now = time.time()
+    window_start = now - _rate_limit_window
+    timestamps = [t for t in _rate_store.get(ip, []) if t > window_start]
+    if len(timestamps) >= _rate_limit_max:
+        _rate_store[ip] = timestamps
+        return True
+    timestamps.append(now)
+    _rate_store[ip] = timestamps
+    return False
 
 # CORS headers
 CORS_HEADERS = {
@@ -230,10 +249,34 @@ def rag_chatbot(request):
     if request.method == "OPTIONS":
         return ("", 204, CORS_HEADERS)
 
+    # ── Rate limiting ──────────────────────────────────────────────────────────
+    client_ip = request.headers.get("X-Forwarded-For", request.remote_addr or "unknown").split(",")[0].strip()
+    if is_rate_limited(client_ip):
+        return (
+            json.dumps({"error": "Too many requests. Please wait a moment."}),
+            429,
+            CORS_HEADERS,
+        )
+
     try:
         body     = request.get_json(silent=True) or {}
         messages = body.get("messages", [])
         lang     = body.get("lang", "en")
+
+        # ── Input validation ───────────────────────────────────────────────────
+        if not isinstance(messages, list):
+            return (json.dumps({"error": "Invalid request."}), 400, CORS_HEADERS)
+
+        if len(messages) > MAX_MESSAGES:
+            return (json.dumps({"error": "Too many messages in history."}), 400, CORS_HEADERS)
+
+        for msg in messages:
+            if not isinstance(msg, dict):
+                return (json.dumps({"error": "Invalid message format."}), 400, CORS_HEADERS)
+            if msg.get("role") not in VALID_ROLES:
+                return (json.dumps({"error": "Invalid message role."}), 400, CORS_HEADERS)
+            if not isinstance(msg.get("content", ""), str) or len(msg["content"]) > MAX_MSG_LENGTH:
+                return (json.dumps({"error": "Message too long."}), 400, CORS_HEADERS)
 
         if not messages or messages[-1]["role"] != "user":
             return (

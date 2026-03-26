@@ -108,13 +108,16 @@ def rag_indexer(request):
     directly from a browser if needed.
     """
     headers = {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type",
+        "Content-Type": "application/json",
     }
 
     if request.method == "OPTIONS":
         return ("", 204, headers)
+
+    # Admin-only endpoint — require a secret token
+    admin_token = os.environ.get("ADMIN_TOKEN", "")
+    if not admin_token or request.headers.get("X-Admin-Token") != admin_token:
+        return (json.dumps({"error": "Unauthorized"}), 401, headers)
 
     print("Starting BM25 indexing...")
 
