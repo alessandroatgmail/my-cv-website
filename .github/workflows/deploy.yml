@@ -113,7 +113,7 @@ jobs:
               INDEX_KEY=${{ secrets.INDEX_KEY }},\
               TOP_K=3,OWNER_NAME=Alessandro,\
               GCP_REGION=${{ secrets.GCP_REGION }},\
-              MODEL_ID=${{ secrets.GCP_MODEL_ID }}, \
+              MODEL_ID=${{ secrets.GCP_MODEL_ID }},\
               GCP_PROJECT=${{ secrets.GCP_PROJECT_ID }}"
 
 
